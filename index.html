@@ -36,6 +36,7 @@
       height: 100%;
       border-radius: 50%;
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      transform-origin: 50% 50%;
       transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
     }
 
@@ -253,19 +254,10 @@
         spinning = false;
         spinBtn.disabled = false;
 
-        // Calculate winner: pointer is at top (270° or -90° in canvas coords)
-        const actualAngle = currentRotation % 360;
+        // Pointer is at top (270° in canvas coords). Wheel rotated CCW by currentRotation.
+        // Angle at pointer = (270° - currentRotation) mod 360.
         const sliceAngle = 360 / items.length;
-        // The pointer is at the top, which corresponds to angle 0 in the rotated frame
-        // but we need to account for the rotation direction
-        const winnerIndex = Math.floor(((360 - actualAngle + 90) % 360) / sliceAngle) % items.length;
-        // Fix: pointer at top means we need to map correctly
-        const correctedIndex = Math.floor(((actualAngle + 90) % 360) / sliceAngle);
-        const winner = items[(items.length - 1 - Math.floor(((currentRotation % 360) ) / sliceAngle) + items.length) % items.length];
-
-        // Simpler calculation
-        const norm = (currentRotation % 360 + 360) % 360;
-        const pointerAngle = (360 - norm + 270) % 360;
+        const pointerAngle = ((270 - currentRotation) % 360 + 360) % 360;
         const idx = Math.floor(pointerAngle / sliceAngle) % items.length;
 
         resultEl.textContent = `🎉 今天吃：${items[idx]}！`;

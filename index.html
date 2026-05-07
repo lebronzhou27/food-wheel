@@ -85,12 +85,7 @@
     #spinBtn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     #result {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      font-weight: 700;
-      min-height: 2rem;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      text-align: center;
+      display: none;
     }
 
     .edit-area {
@@ -242,10 +237,27 @@
       spinBtn.disabled = true;
       resultEl.textContent = '';
 
-      const extraSpins = 5 + Math.floor(Math.random() * 5); // 5-9 full spins
-      const randomAngle = Math.random() * 360;
-      const totalDegrees = extraSpins * 360 + randomAngle;
-      currentRotation += totalDegrees;
+      const n = items.length;
+      const sliceAngle = 360 / n;
+
+      // Step 1: 先随机选一个赢家
+      const winnerIndex = Math.floor(Math.random() * n);
+
+      // Step 2: 计算要让这个赢家居中于指针(顶部=270°)需要的目标角度
+      // item i 的中心角度: (i + 0.5) * sliceAngle (canvas坐标系, 0°=3点钟)
+      // CSS rotate(-R) = 顺时针转R度
+      // 旋转后, 指针(270°)看到的canvas角度 = (270 + R) % 360
+      // 要让 winnerIndex 居中: (270 + R) % 360 = (winnerIndex + 0.5) * sliceAngle
+      // 即: R = (winnerIndex + 0.5) * sliceAngle - 270 (mod 360)
+      const itemCenter = (winnerIndex + 0.5) * sliceAngle;
+      const targetMod = ((itemCenter - 270) % 360 + 360) % 360;
+
+      // Step 3: 从当前角度旋转到目标角度 (多转几圈)
+      const fullSpins = (5 + Math.floor(Math.random() * 5)) * 360;
+      const currentMod = ((currentRotation % 360) + 360) % 360;
+      let delta = targetMod - currentMod;
+      if (delta <= 0) delta += 360;
+      currentRotation += fullSpins + delta;
 
       canvas.style.transform = `rotate(-${currentRotation}deg)`;
 
@@ -253,14 +265,7 @@
       setTimeout(() => {
         spinning = false;
         spinBtn.disabled = false;
-
-        // CSS rotate(-R) = 顺时针旋转R度
-        // 顺时针旋转R后，屏幕270°(顶部指针)对应的canvas坐标 = (270 + R) mod 360
-        const sliceAngle = 360 / items.length;
-        const pointerAngle = ((270 + currentRotation) % 360 + 360) % 360;
-        const idx = Math.floor(pointerAngle / sliceAngle) % items.length;
-
-        resultEl.textContent = `🎉 今天吃：${items[idx]}！`;
+        resultEl.textContent = `🎉 今天吃：${items[winnerIndex]}！`;
       }, duration + 100);
     }
 

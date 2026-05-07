@@ -254,8 +254,9 @@
         spinning = false;
         spinBtn.disabled = false;
 
-        // Pointer is at top (270° in canvas coords). Wheel rotated CCW by currentRotation.
-        // Angle at pointer = (270° - currentRotation) mod 360.
+        // CSS rotate(-R) = 顺时针旋转R度
+        // 屏幕270°(顶部指针) = (canvas坐标 + R) mod 360
+        // 所以 canvas坐标 = (270 - R) mod 360
         const sliceAngle = 360 / items.length;
         const pointerAngle = ((270 - currentRotation) % 360 + 360) % 360;
         const idx = Math.floor(pointerAngle / sliceAngle) % items.length;
